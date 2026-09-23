@@ -10,7 +10,8 @@ f, tok = sys.argv[1], sys.argv[2]
 raw = open(f).read()
 m = re.match(r'<!-- id: (\d+) \| published: [^>]* -->\n<!-- subject: (.*) -->\n<!-- preview: (.*) -->\n', raw)
 aid, subject, preview = int(m.group(1)), m.group(2), m.group(3)
-body = raw[m.end():].rstrip('\n')
+body = raw[m.end():]
+if body.endswith('\n'): body = body[:-1]  # the snapshot adds exactly one newline
 url = 'https://api.cloudflare.com/client/v4/accounts/193b347aedeaafe35de0b5a534b2d9aa/d1/database/c4d5aabe-a97d-489e-a26e-93279794859a/query'
 req = urllib.request.Request(url, method='POST', headers={'Authorization': 'Bearer ' + tok, 'content-type': 'application/json', 'User-Agent': 'thewindstorm-archive-apply'},
   data=json.dumps({'sql': "UPDATE articles SET body_html=?1, subject=?2, preview=?3, updated_at=datetime('now') WHERE id=?4 AND published_at IS NOT NULL",
