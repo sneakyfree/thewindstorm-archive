@@ -4,9 +4,10 @@
 set -euo pipefail
 f="$1"; [ -f "$f" ]
 T="${CF_D1_TOKEN:-$(grep 'GrantWhitmerBriefWriter' ~/kit-army-config/ACCESS_LOCKBOX.md | grep -oE 'cfat_[A-Za-z0-9_-]{20,}' | head -1)}"
-python3 - "$f" "$T" <<'PY'
-import json, re, sys, urllib.request
-f, tok = sys.argv[1], sys.argv[2]
+# Token goes to python through the environment, never argv (argv is readable by every local user via ps).
+D1_TOKEN="$T" python3 - "$f" <<'PY'
+import json, os, re, sys, urllib.request
+f, tok = sys.argv[1], os.environ["D1_TOKEN"]
 raw = open(f).read()
 m = re.match(r'<!-- id: (\d+) \| published: [^>]* -->\n<!-- subject: (.*) -->\n<!-- preview: (.*) -->\n', raw)
 aid, subject, preview = int(m.group(1)), m.group(2), m.group(3)
